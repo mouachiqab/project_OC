@@ -35,14 +35,11 @@ def main():
             continue
         
         print(f"\nProcessing: {config_file}")
-        print("-"*60)
         
         generator = InstanceGenerator(str(config_path))
         generator.generate_all_scenarios(str(output_dir))
-    
-    print("\n" + "="*60)
+
     print("GENERATION COMPLETE")
-    print("="*60)
     print(f"Instances saved in: {output_dir}")
 
 if __name__ == '__main__':
