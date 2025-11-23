@@ -1,0 +1,45 @@
+# Configuration : Hôpital Moyen
+# Auteurs: Abdelkarim & Marin
+
+hospital:
+  name: "Hôpital Régional"
+  type: "medium"
+  
+resources:
+  num_doctors: 6
+  num_beds: 50
+  
+patient_flow:
+  arrival_rate: 180  # patients par jour (7.5 par heure)
+  
+  priority_distribution:
+    P1_RESUSCITATION: 0.05
+    P2_EMERGENT: 0.15
+    P3_URGENT: 0.30
+    P4_LESS_URGENT: 0.35
+    P5_NON_URGENT: 0.15
+
+optimization:
+  method: "MILP"
+  interval: 30
+  time_limit: 120
+  solver: "PULP_CBC_CMD"
+
+simulation:
+  duration: 1440
+  warmup: 120
+  replications: 5
+
+scenarios:
+  baseline:
+    name: "Journée Normale"
+    arrival_multiplier: 1.0
+  
+  peak_flu:
+    name: "Pic Grippal"
+    arrival_multiplier: 1.4
+    
+  equipment_failure:
+    name: "Panne d'Équipement"
+    resource_reduction:
+      num_beds: 40  # Réduction de 10 civières
