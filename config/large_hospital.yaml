@@ -1,0 +1,45 @@
+# Configuration : Grand Centre Hospitalier Universitaire (CHU)
+# Auteurs: Abdelkarim & Marin
+
+hospital:
+  name: "CHU Universitaire"
+  type: "large"
+  
+resources:
+  num_doctors: 12
+  num_beds: 120
+  
+patient_flow:
+  arrival_rate: 400  # patients par jour (16.7 par heure)
+  
+  priority_distribution:
+    P1_RESUSCITATION: 0.05
+    P2_EMERGENT: 0.15
+    P3_URGENT: 0.30
+    P4_LESS_URGENT: 0.35
+    P5_NON_URGENT: 0.15
+
+optimization:
+  method: "CP"
+  interval: 20
+  time_limit: 180
+  solver: "chuffed"
+
+simulation:
+  duration: 1440
+  warmup: 120
+  replications: 3
+
+scenarios:
+  baseline:
+    name: "Journée Normale"
+    arrival_multiplier: 1.0
+    
+  peak_flu:
+    name: "Pic Grippal"
+    arrival_multiplier: 1.4
+    
+  staff_shortage:
+    name: "Pénurie de Personnel"
+    resource_reduction:
+      num_doctors: 9  # Réduction de 3 médecins
