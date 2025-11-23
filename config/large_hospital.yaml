@@ -10,7 +10,7 @@ resources:
   num_beds: 120
   
 patient_flow:
-  arrival_rate: 400  # patients par jour (16.7 par heure)
+  arrival_rate: 400  # patients par jour 
   
   priority_distribution:
     P1_RESUSCITATION: 0.05

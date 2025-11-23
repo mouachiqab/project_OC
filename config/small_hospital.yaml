@@ -10,7 +10,7 @@ resources:
   num_beds: 25
   
 patient_flow:
-  arrival_rate: 60  # patients par jour (2.5 par heure)
+  arrival_rate: 60  # patients par jour 
   
   # Distribution des priorités 
   priority_distribution:
