@@ -1,0 +1,26 @@
+# Core dependencies
+simpy==4.1.1
+numpy==1.26.4
+pandas==2.2.1
+pyyaml==6.0.1
+scipy==1.12.0
+gurobipy==11.0.1
+
+# Optimization
+pulp==2.8.0
+minizinc==0.9.0
+
+# Visualization
+matplotlib==3.8.3
+seaborn==0.13.2
+plotly==5.20.0
+
+# Testing
+pytest==8.1.1
+pytest-cov==4.1.0
+
+# Development
+black==24.3.0
+flake8==7.0.0
+mypy==1.9.0
+
