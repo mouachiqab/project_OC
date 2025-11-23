@@ -1,0 +1,50 @@
+# Configuration : Petit Hôpital
+# Auteurs: Abdelkarim & Marin
+
+hospital:
+  name: "Petit Hôpital Régional"
+  type: "small"
+  
+resources:
+  num_doctors: 3
+  num_beds: 25
+  
+patient_flow:
+  arrival_rate: 60  # patients par jour (2.5 par heure)
+  
+  # Distribution des priorités 
+  priority_distribution:
+    P1_RESUSCITATION: 0.05   # 5%
+    P2_EMERGENT: 0.15         # 15%
+    P3_URGENT: 0.30           # 30%
+    P4_LESS_URGENT: 0.35      # 35%
+    P5_NON_URGENT: 0.15       # 15%
+
+optimization:
+  method: "CP"  # ou "MILP"
+  interval: 30  # minutes entre optimisations
+  time_limit: 60  # secondes
+  solver: "chuffed"  # pour CP: chuffed, gecode | pour MILP: PULP_CBC_CMD
+
+simulation:
+  duration: 1440  # minutes 
+  warmup: 120     # minutes de warm-up
+  replications: 5  # nombre de répétitions
+
+scenarios:
+  baseline:
+    name: "Journée Normale"
+    arrival_multiplier: 1.0
+    
+  peak_flu:
+    name: "Pic Grippal"
+    arrival_multiplier: 1.4
+    priority_shift:
+      P3_URGENT: 0.40
+      
+  major_accident:
+    name: "Accident Majeur"
+    mass_arrival:
+      time: 180  # minutes après début
+      count: 50
+      priority: "P2_EMERGENT"
