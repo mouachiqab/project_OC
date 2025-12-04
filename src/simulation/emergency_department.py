@@ -92,24 +92,23 @@ class EmergencyDepartment:
             print(f"[{self.env.now:>6.1f}] Patient {patient.id} arrived ({priority.name})")
     
     def deterioration_process(self):
-        """Processus de détérioration des patients en attente"""
+        """Processus simplifié de détérioration des patients en attente"""
         while True:
-            yield self.env.timeout(15)  # Vérifier toutes les 15 minutes
+            yield self.env.timeout(30)  # Vérifier toutes les 30 minutes 
             
-            for priority in [Priority.P5_NON_URGENT, Priority.P4_LESS_URGENT, 
-                            Priority.P3_URGENT, Priority.P2_EMERGENT]:
-                for patient in self.waiting_patients[priority]:
+            # Seulement les cas critiques se détériorent
+            for priority in [Priority.P3_URGENT, Priority.P2_EMERGENT]:
+                for patient in list(self.waiting_patients[priority]):
                     wait_time = patient.get_wait_time(self.env.now)
                     max_wait = patient.get_max_wait_time()
                     
-                    # Probabilité de détérioration augmente avec l'attente
-                    if wait_time > max_wait * 1.5:
-                        if np.random.random() < 0.2:  # 20% de chance
+                    # Détérioration seulement si attente > 2x le max
+                    if wait_time > max_wait * 2.0:
+                        if np.random.random() < 0.15:  # 15% de chance 
                             old_priority = patient.priority
                             patient.deteriorate()
                             
                             if patient.priority != old_priority:
-                                # Déplacer vers nouvelle file
                                 self.waiting_patients[old_priority].remove(patient)
                                 self.waiting_patients[patient.priority].append(patient)
                                 self.total_deteriorations += 1
@@ -120,14 +119,11 @@ class EmergencyDepartment:
             yield self.env.timeout(self.optimization_interval)
             
             if self.optimizer is not None:
-                # Préparer l'état du système
                 state = self._get_system_state()
                 
-                # Appeler l'optimiseur
                 try:
                     assignments = self.optimizer(state)
                     
-                    # Appliquer les affectations
                     for patient_id, doctor_id, bed_id in assignments:
                         self._assign_patient(patient_id, doctor_id, bed_id)
                         
@@ -135,7 +131,7 @@ class EmergencyDepartment:
                     print(f"[{self.env.now:>6.1f}] Optimization error: {e}")
     
     def _get_system_state(self) -> Dict:
-        """Récupère l'état actuel du système pour l'optimiseur"""
+        """Récupère l'état actuel du système"""
         all_waiting = []
         for priority_queue in self.waiting_patients.values():
             all_waiting.extend(priority_queue)
@@ -182,8 +178,7 @@ class EmergencyDepartment:
         print(f"[{self.env.now:>6.1f}] Patient {patient_id} assigned to Dr.{doctor_id} & Bed{bed_id}")
     
     def _treatment_process(self, patient: Patient):
-        """Processus de traitement d'un patient"""
-        # Attendre la durée du traitement
+        """Traitement d'un patient"""
         yield self.env.timeout(patient.treatment_duration)
         
         # Libérer les ressources
@@ -206,12 +201,10 @@ class EmergencyDepartment:
     def collect_metrics(self):
         """Collecte périodique des métriques"""
         while True:
-            yield self.env.timeout(10)  # Toutes les 10 minutes
+            yield self.env.timeout(10)
             
-            # Compter les patients en attente
             total_waiting = sum(len(queue) for queue in self.waiting_patients.values())
             
-            # Calculer les temps d'attente moyens
             wait_times = []
             for priority_queue in self.waiting_patients.values():
                 for patient in priority_queue:
@@ -258,11 +251,26 @@ class EmergencyDepartment:
     
     def get_results(self) -> Dict:
         """Retourne les résultats de la simulation"""
+        # Convertir les patients en format sérialisable
+        discharged_data = [
+            {
+                'id': p.id,
+                'initial_priority': p.initial_priority.name,
+                'final_priority': p.priority.name,
+                'arrival_time': p.arrival_time,
+                'start_treatment': p.state.start_treatment_time,
+                'end_treatment': p.state.end_treatment_time,
+                'wait_time': p.get_wait_time(p.state.start_treatment_time or self.env.now),
+                'treatment_duration': p.treatment_duration
+            }
+            for p in self.discharged_patients
+        ]
+        
         return {
             'metrics': dict(self.metrics),
             'total_arrivals': self.total_arrivals,
             'total_treated': self.total_treated,
             'total_deteriorations': self.total_deteriorations,
-            'discharged_patients': self.discharged_patients,
+            'discharged_patients': discharged_data,
             'resource_stats': self.resources.get_statistics()
         }

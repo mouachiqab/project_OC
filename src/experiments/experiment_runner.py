@@ -29,17 +29,9 @@ class ExperimentRunner:
         self.results = {}
     
     def run_single_replication(self, replication_id: int) -> Dict:
-        """
-        Exécute une seule réplication de la simulation
-        
-        Args:
-            replication_id: Numéro de la réplication
-        
-        Returns:
-            Résultats de la simulation
-        """
+        """Exécute une réplication"""
         print(f"\nReplication {replication_id + 1}...")
-        print("-" * 40)
+
         
         # Créer l'environnement SimPy
         env = simpy.Environment()
@@ -79,22 +71,16 @@ class ExperimentRunner:
         results['elapsed_time'] = elapsed_time
         results['instance_name'] = self.instance_name
         
-        print(f"Replication {replication_id + 1} completed in {elapsed_time:.2f}s")
+        print(f"Completed in {elapsed_time:.2f}s")
         
         return results
     
     def run_experiment(self) -> Dict:
-        """
-        Exécute toutes les répétitions de l'expérience
-        
-        Returns:
-            Résultats agrégés de toutes les répétitions
-        """
+        """Exécute toutes les répétitions"""
         num_replications = self.instance['simulation']['replications']
         
-        print(f"RUNNING EXPERIMENT: {self.instance_name}")
+        print(f"\nRUNNING EXPERIMENT: {self.instance_name}")
         print(f"Hospital: {self.instance['hospital']['name']}")
-        print(f"Scenario: {self.instance['scenario']['name']}")
         print(f"Method: {self.instance['optimization']['method']}")
         print(f"Replications: {num_replications}")
         

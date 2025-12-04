@@ -12,26 +12,15 @@ class InstanceGenerator:
     """Génère des instances de test pour les expériences"""
     
     def __init__(self, config_path: str):
-        """
-        Args:
-            config_path: Chemin vers le fichier de configuration YAML
-        """
+        """Initialise le générateur d'instances"""
         with open(config_path, 'r') as f:
             self.config = yaml.safe_load(f)
         
         self.hospital_type = self.config['hospital']['type']
-        self.rng = np.random.RandomState(42)  # Pour reproductibilité
+        self.rng = np.random.RandomState(42)
     
     def generate_scenario_instance(self, scenario_name: str) -> Dict:
-        """
-        Génère une instance pour un scénario donné
-        
-        Args:
-            scenario_name: Nom du scénario (baseline, peak_flu, etc.)
-        
-        Returns:
-            Dictionnaire avec les paramètres de l'instance
-        """
+        """Génère une instance pour un scénario donné"""
         scenario = self.config['scenarios'][scenario_name]
         
         instance = {

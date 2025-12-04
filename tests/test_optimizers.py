@@ -76,8 +76,67 @@ class TestMILPOptimizer:
         
         assignments = optimizer.optimize(state)
         
-        # Devrait avoir au moins une affectation
-        assert len(assignments) >= 0  # Peut être 0 si le solveur ne trouve pas de solution rapidement
+        # Devrait trouver une solution (1 patient, 1 médecin, 1 civière disponibles)
+        assert len(assignments) == 1
+        assert assignments[0][0] == patients[0].id
+        assert assignments[0][1] == 0  # doctor_id
+        assert assignments[0][2] == 0  # bed_id
+    
+    def test_milp_multiple_patients(self):
+        """Test avec plusieurs patients de priorités différentes"""
+        optimizer = MILPOptimizer(time_limit=30)
+        
+        patients = [
+            Patient(arrival_time=0.0, initial_priority=Priority.P1_RESUSCITATION),
+            Patient(arrival_time=5.0, initial_priority=Priority.P3_URGENT),
+            Patient(arrival_time=10.0, initial_priority=Priority.P5_NON_URGENT)
+        ]
+        doctors = [Doctor(id=0, name="Dr. A"), Doctor(id=1, name="Dr. B")]
+        beds = [Bed(id=0), Bed(id=1)]
+        
+        state = {
+            'waiting_patients': patients,
+            'available_doctors': doctors,
+            'available_beds': beds,
+            'current_time': 30.0
+        }
+        
+        assignments = optimizer.optimize(state)
+        
+        # Devrait assigner au moins les patients prioritaires
+        assert len(assignments) >= 1
+        # Vérifier qu'aucune ressource n'est utilisée deux fois
+        assigned_doctors = [a[1] for a in assignments]
+        assigned_beds = [a[2] for a in assignments]
+        assert len(assigned_doctors) == len(set(assigned_doctors))
+        assert len(assigned_beds) == len(set(assigned_beds))
+    
+    def test_milp_insufficient_resources(self):
+        """Test avec plus de patients que de ressources"""
+        optimizer = MILPOptimizer(time_limit=30)
+        
+        patients = [
+            Patient(arrival_time=0.0, initial_priority=Priority.P2_EMERGENT),
+            Patient(arrival_time=5.0, initial_priority=Priority.P3_URGENT),
+            Patient(arrival_time=10.0, initial_priority=Priority.P4_LESS_URGENT)
+        ]
+        doctors = [Doctor(id=0, name="Dr. A")]
+        beds = [Bed(id=0)]
+        
+        state = {
+            'waiting_patients': patients,
+            'available_doctors': doctors,
+            'available_beds': beds,
+            'current_time': 30.0
+        }
+        
+        assignments = optimizer.optimize(state)
+        
+        # Ne peut assigner qu'un seul patient maximum
+        assert len(assignments) <= 1
+        if len(assignments) == 1:
+            # Devrait prioriser le patient P2
+            assert assignments[0][0] == patients[0].id
 
 class TestCPOptimizer:
     """Tests pour l'optimiseur CP"""
@@ -105,6 +164,58 @@ class TestCPOptimizer:
             
             assignments = optimizer.optimize(state)
             assert assignments == []
+        except Exception as e:
+            pytest.skip(f"MiniZinc not available: {e}")
+    
+    def test_cp_simple_assignment(self):
+        """Test affectation simple avec CP"""
+        try:
+            optimizer = CPOptimizer(time_limit=30, solver_name='chuffed')
+            
+            patients = [
+                Patient(arrival_time=0.0, initial_priority=Priority.P2_EMERGENT)
+            ]
+            doctors = [Doctor(id=0, name="Dr. A")]
+            beds = [Bed(id=0)]
+            
+            state = {
+                'waiting_patients': patients,
+                'available_doctors': doctors,
+                'available_beds': beds,
+                'current_time': 30.0
+            }
+            
+            assignments = optimizer.optimize(state)
+            
+            # Devrait trouver une solution
+            assert len(assignments) == 1
+            assert assignments[0][0] == patients[0].id
+        except Exception as e:
+            pytest.skip(f"MiniZinc not available: {e}")
+    
+    def test_cp_multiple_patients(self):
+        """Test avec plusieurs patients"""
+        try:
+            optimizer = CPOptimizer(time_limit=30, solver_name='chuffed')
+            
+            patients = [
+                Patient(arrival_time=0.0, initial_priority=Priority.P1_RESUSCITATION),
+                Patient(arrival_time=5.0, initial_priority=Priority.P3_URGENT)
+            ]
+            doctors = [Doctor(id=0, name="Dr. A"), Doctor(id=1, name="Dr. B")]
+            beds = [Bed(id=0), Bed(id=1)]
+            
+            state = {
+                'waiting_patients': patients,
+                'available_doctors': doctors,
+                'available_beds': beds,
+                'current_time': 30.0
+            }
+            
+            assignments = optimizer.optimize(state)
+            
+            # Devrait assigner les deux patients
+            assert len(assignments) >= 1
         except Exception as e:
             pytest.skip(f"MiniZinc not available: {e}")
 

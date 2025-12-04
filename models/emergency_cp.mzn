@@ -82,7 +82,11 @@ var int: penalty_overtime = sum(i in 1..n_patients)(
 % Objectif total : minimiser toutes les pénalités
 var int: objective = penalty_untreated + penalty_waiting + penalty_overtime;
 
-solve minimize objective;
+% Stratégie de recherche pour améliorer les performances
+solve :: int_search(z, first_fail, indomain_max, complete)
+      :: int_search(x, input_order, indomain_min, complete)
+      :: int_search(y, input_order, indomain_min, complete)
+      minimize objective;
 
 % SORTIE
 
@@ -95,10 +99,6 @@ output [
     "\nAssignments:\n"
 ] ++
 [
-    if z[i] = 1 then
-        "Patient \(i) -> Doctor \(x[i]) & Bed \(y[i]) (Priority=\(priority[i]), Wait=\(wait_time[i])min)\n"
-    else
-        ""
-    endif
-    | i in 1..n_patients
+    "Patient \(i) -> Doctor \(x[i]) & Bed \(y[i]) (Priority=\(priority[i]), Wait=\(wait_time[i])min, Treated=\(z[i]))\n"
+    | i in 1..n_patients where fix(z[i]) = 1
 ];

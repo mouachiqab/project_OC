@@ -29,13 +29,7 @@ class Patient:
     _id_counter = 0
     
     def __init__(self, arrival_time: float, initial_priority: Priority):
-        """
-        Initialise un patient
-        
-        Args:
-            arrival_time: Temps d'arrivée en minutes
-            initial_priority: Priorité initiale (P1-P5)
-        """
+        """Initialise un patient"""
         Patient._id_counter += 1
         self.id = Patient._id_counter
         self.arrival_time = arrival_time

@@ -15,6 +15,7 @@ class OptimizerInterface(ABC):
         
         Args:
             state: État actuel du système
+
         """
         pass
     

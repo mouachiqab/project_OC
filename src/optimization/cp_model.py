@@ -4,6 +4,7 @@ Auteur: Abdelkarim Mouachiq
 """
 from minizinc import Instance, Model, Solver
 from typing import List, Dict, Tuple, Optional
+from datetime import timedelta
 import numpy as np
 from pathlib import Path
 
@@ -79,7 +80,7 @@ class CPOptimizer:
             instance['current_time'] = int(current_time)
             
             # Résoudre avec timeout
-            result = instance.solve(timeout=self.time_limit)
+            result = instance.solve(timeout=timedelta(seconds=self.time_limit))
             
             if result.solution is not None:
                 # Extraire les affectations
@@ -99,9 +100,7 @@ class CPOptimizer:
                             actual_bed = available_beds[bed_idx].id
                             assignments.append((patient.id, actual_doctor, actual_bed))
                 
-                print(f"CP Solver: Found solution with {len(assignments)} assignments")
-                print(f"  Objective: {result['objective']}")
-                print(f"  Solve time: {result.statistics.get('time', 'N/A')}s")
+                print(f"CP Solver: {len(assignments)} assignments (objective: {result['objective']})")
                 
                 return assignments
             else:

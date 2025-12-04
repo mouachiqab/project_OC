@@ -160,9 +160,7 @@ class MILPOptimizer:
                             actual_bed = available_beds[bed_idx].id
                             assignments.append((patient.id, actual_doctor, actual_bed))
                 
-                print(f"MILP Solver: Found solution with {len(assignments)} assignments")
-                print(f"  Objective: {value(prob.objective):.2f}")
-                print(f"  Status: {status}")
+                print(f"MILP Solver: {len(assignments)} assignments (objective: {value(prob.objective):.0f})")
                 
                 return assignments
             else:

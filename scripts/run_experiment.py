@@ -2,11 +2,6 @@
 """
 Script principal pour lancer les expériences
 Auteurs: Abdelkarim & Marin
-
-Usage:
-    python scripts/run_experiment.py --instance data/instances/small_baseline.json
-    python scripts/run_experiment.py --config config/small_hospital.yaml --scenario baseline
-    python scripts/run_experiment.py --all  # Lance toutes les instances
 """
 import argparse
 import sys
@@ -58,14 +53,15 @@ def run_all_instances(instances_dir: str, output_dir: str):
     all_results = []
     
     for instance_file in instance_files:
-        print(f"Running: {instance_file.name}")
+        print(f"\nRunning: {instance_file.name}")
         
         results = run_from_instance(str(instance_file), output_dir)
         all_results.append(results)
     
+
     print(f"ALL EXPERIMENTS COMPLETED")
-    print(f"Total experiments: {len(all_results)}")
-    print(f"Results saved in: {output_dir}")
+    print(f"Total: {len(all_results)} experiments")
+    print(f"Results in: {output_dir}")
 
 def main():
     parser = argparse.ArgumentParser(description='Run emergency department experiments')

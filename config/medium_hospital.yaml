@@ -10,7 +10,7 @@ resources:
   num_beds: 50
   
 patient_flow:
-  arrival_rate: 180  # patients par jour 
+  arrival_rate: 120  # patients par jour 
   
   priority_distribution:
     P1_RESUSCITATION: 0.05
@@ -22,13 +22,13 @@ patient_flow:
 optimization:
   method: "MILP"
   interval: 30
-  time_limit: 120
+  time_limit: 20
   solver: "PULP_CBC_CMD"
 
 simulation:
-  duration: 1440
-  warmup: 120
-  replications: 5
+  duration: 360  # minutes (6 heures)
+  warmup: 30
+  replications: 3
 
 scenarios:
   baseline:
@@ -37,9 +37,4 @@ scenarios:
   
   peak_flu:
     name: "Pic Grippal"
-    arrival_multiplier: 1.4
-    
-  equipment_failure:
-    name: "Panne d'Équipement"
-    resource_reduction:
-      num_beds: 40  # Réduction de 10 civières
+    arrival_multiplier: 1.3

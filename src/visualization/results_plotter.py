@@ -166,8 +166,9 @@ class ResultsPlotter:
             for replication in result['replications']:
                 resource_stats = replication['resource_stats']
                 
-                doc_util = np.mean(resource_stats['doctors']['utilization_rates'])
-                bed_util = np.mean(resource_stats['beds']['occupancy_rates'])
+                # Convertir en float si c'est un numpy type
+                doc_util = float(np.mean(resource_stats['doctors']['utilization_rates']))
+                bed_util = float(np.mean(resource_stats['beds']['occupancy_rates']))
                 
                 doctor_util.append(doc_util)
                 bed_util.append(bed_util)

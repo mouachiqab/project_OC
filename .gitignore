@@ -20,14 +20,29 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Data & Results
-data/results/*.csv
-data/results/*.json
+
+data/instances/*.json
 data/instances/*.yaml
+data/results/
 
 # Logs
 *.log
 logs/
+texput.log
+
+# Rapport LaTeX
+rapport/*.pdf
+rapport/*.aux
+rapport/*.log
+rapport/*.out
+rapport/*.toc
+rapport/*.bbl
+rapport/*.blg
+rapport/*.fls
+rapport/*.fdb_latexmk
+rapport/*.synctex.gz
+rapport/logo_laval.png
+rapport/logo_laval.txt
 
 # MiniZinc
 *.ozn
