@@ -21,11 +21,11 @@ def run_from_instance(instance_path: str, output_dir: str):
     
     return results
 
-def run_from_config(config_path: str, scenario: str, output_dir: str):
-    """Lance une expérience depuis une config et un scénario"""
+def run_from_config(config_path: str, scenario: str, method: str, output_dir: str):
+    """Lance une expérience depuis une config, un scénario et une méthode"""
     # Générer l'instance
     generator = InstanceGenerator(config_path)
-    instance = generator.generate_scenario_instance(scenario)
+    instance = generator.generate_scenario_instance(scenario, method)
     
     # Sauvegarder temporairement
     temp_instance = Path(output_dir) / 'temp_instance.json'
@@ -69,6 +69,7 @@ def main():
     parser.add_argument('--instance', type=str, help='Path to instance JSON file')
     parser.add_argument('--config', type=str, help='Path to config YAML file')
     parser.add_argument('--scenario', type=str, help='Scenario name (requires --config)')
+    parser.add_argument('--method', type=str, choices=['CP', 'MILP'], help='Optimization method (requires --config)')
     parser.add_argument('--all', action='store_true', help='Run all instances')
     parser.add_argument('--output', type=str, default='data/results', help='Output directory')
     
@@ -78,8 +79,8 @@ def main():
         run_all_instances('data/instances', args.output)
     elif args.instance:
         run_from_instance(args.instance, args.output)
-    elif args.config and args.scenario:
-        run_from_config(args.config, args.scenario, args.output)
+    elif args.config and args.scenario and args.method:
+        run_from_config(args.config, args.scenario, args.method, args.output)
     else:
         parser.print_help()
 

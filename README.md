@@ -44,8 +44,15 @@ python scripts/run_experiment.py --config config/small_hospital.yaml
 ```
 
 ##  Approches
-1. **Simulation + CP** : MiniZinc/OR-Tools
-2. **Simulation + MILP** : PuLP/CBC
+**Objectif** : Comparer deux méthodes d'optimisation sur les mêmes instances
+
+1. **CP (Constraint Programming)** : MiniZinc avec solveur Chuffed
+2. **MILP (Mixed Integer Linear Programming)** : PuLP avec solveur CBC
+
+Chaque configuration d'hôpital est testée avec **les deux méthodes** pour comparer :
+- Nombre de patients traités
+- Temps d'exécution
+- Qualité des affectations
 
 ##  Références
 Voir `docs/references.md`

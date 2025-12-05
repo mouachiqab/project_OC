@@ -20,10 +20,14 @@ patient_flow:
     P5_NON_URGENT: 0.15
 
 optimization:
-  method: "MILP"
   interval: 30
   time_limit: 20
-  solver: "PULP_CBC_CMD"
+  # Méthodes à tester: CP et MILP
+  methods:
+    CP:
+      solver: "chuffed"
+    MILP:
+      solver: "PULP_CBC_CMD"
 
 simulation:
   duration: 360  # minutes (6 heures)

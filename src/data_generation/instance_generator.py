@@ -19,15 +19,23 @@ class InstanceGenerator:
         self.hospital_type = self.config['hospital']['type']
         self.rng = np.random.RandomState(42)
     
-    def generate_scenario_instance(self, scenario_name: str) -> Dict:
-        """Génère une instance pour un scénario donné"""
+    def generate_scenario_instance(self, scenario_name: str, method: str) -> Dict:
+        """Génère une instance pour un scénario et une méthode d'optimisation donnés"""
         scenario = self.config['scenarios'][scenario_name]
+        
+        # Copier la config optimization et ajouter la méthode spécifique
+        optimization_config = {
+            'method': method,
+            'interval': self.config['optimization']['interval'],
+            'time_limit': self.config['optimization']['time_limit'],
+            'solver': self.config['optimization']['methods'][method]['solver']
+        }
         
         instance = {
             'hospital': self.config['hospital'],
             'resources': self.config['resources'].copy(),
             'patient_flow': self.config['patient_flow'].copy(),
-            'optimization': self.config['optimization'],
+            'optimization': optimization_config,
             'simulation': self.config['simulation'],
             'scenario': scenario
         }
@@ -58,14 +66,19 @@ class InstanceGenerator:
         print(f"Instance saved to: {output_path}")
     
     def generate_all_scenarios(self, output_dir: str):
-        """Génère toutes les instances pour tous les scénarios"""
+        """Génère toutes les instances pour tous les scénarios ET toutes les méthodes"""
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
         
-        for scenario_name in self.config['scenarios'].keys():
-            instance = self.generate_scenario_instance(scenario_name)
-            
-            filename = f"{self.hospital_type}_{scenario_name}.json"
-            self.save_instance(instance, output_path / filename)
+        methods = list(self.config['optimization']['methods'].keys())
         
-        print(f"Generated {len(self.config['scenarios'])} instances for {self.hospital_type}")
+        count = 0
+        for scenario_name in self.config['scenarios'].keys():
+            for method in methods:
+                instance = self.generate_scenario_instance(scenario_name, method)
+                
+                filename = f"{self.hospital_type}_{scenario_name}_{method}.json"
+                self.save_instance(instance, output_path / filename)
+                count += 1
+        
+        print(f"Generated {count} instances for {self.hospital_type} ({len(self.config['scenarios'])} scenarios × {len(methods)} methods)")
