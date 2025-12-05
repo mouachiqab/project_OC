@@ -30,20 +30,6 @@ data/results/
 logs/
 texput.log
 
-# Rapport LaTeX
-rapport/*.pdf
-rapport/*.aux
-rapport/*.log
-rapport/*.out
-rapport/*.toc
-rapport/*.bbl
-rapport/*.blg
-rapport/*.fls
-rapport/*.fdb_latexmk
-rapport/*.synctex.gz
-rapport/logo_laval.png
-rapport/logo_laval.txt
-
 # MiniZinc
 *.ozn
 *.fzn

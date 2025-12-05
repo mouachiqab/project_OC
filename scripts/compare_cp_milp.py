@@ -1,7 +1,5 @@
-#!/usr/bin/env python3
 """
 Script de comparaison directe CP vs MILP
-Auteurs: Abdelkarim & Marin
 
 Analyse les résultats et génère un tableau comparatif
 """
@@ -33,7 +31,6 @@ def extract_comparison_data(results):
     for result in results:
         instance_name = result['instance_name']
         
-        # Parser le nom: {hospital}_{scenario}_{method}
         parts = instance_name.split('_')
         if len(parts) >= 3:
             hospital = parts[0]
@@ -61,7 +58,6 @@ def create_comparison_table(data):
     """Crée un tableau de comparaison"""
     df = pd.DataFrame(data)
     
-    # Trier par hôpital, scénario, méthode
     df = df.sort_values(['Hôpital', 'Scénario', 'Méthode'])
     
     return df
@@ -92,7 +88,6 @@ def calculate_improvements(df):
             cp_time = float(cp_row['Temps Exec (s)'].values[0])
             milp_time = float(milp_row['Temps Exec (s)'].values[0])
             
-            # Calcul des différences
             treated_diff = milp_treated - cp_treated
             treated_pct = (treated_diff / cp_treated * 100) if cp_treated > 0 else 0
             
@@ -114,36 +109,25 @@ def calculate_improvements(df):
     return pd.DataFrame(improvements)
 
 def main():
-    print("=" * 80)
     print("COMPARAISON CP vs MILP")
-    print("=" * 80)
     print()
     
-    # Charger les résultats
     results = load_results()
     
-    if not results:
-        print("❌ Aucun résultat trouvé dans data/results/")
-        print("   Lancez d'abord: ./scripts/run_all_comparisons.sh")
-        sys.exit(1)
-    
-    print(f"✅ {len(results)} résultats chargés")
+    print(f"{len(results)} resultats charges")
     print()
     
     # Extraire les données
     data = extract_comparison_data(results)
     df = create_comparison_table(data)
     
-    # Afficher le tableau complet
-    print("📊 TABLEAU COMPLET DES RÉSULTATS")
-    print("-" * 80)
+    print("TABLEAU COMPLET DES RESULTATS")
     print(df.to_string(index=False))
     print()
     
-    # Sauvegarder en CSV
     output_csv = Path('data/results/comparison_cp_milp.csv')
     df.to_csv(output_csv, index=False)
-    print(f"💾 Tableau sauvegardé: {output_csv}")
+    print(f"Tableau sauvegarde: {output_csv}")
     print()
     
     # Calculer les améliorations
@@ -151,20 +135,16 @@ def main():
         improvements_df = calculate_improvements(df)
         
         if not improvements_df.empty:
-            print("📈 ANALYSE COMPARATIVE (MILP vs CP)")
-            print("-" * 80)
+            print("ANALYSE COMPARATIVE (MILP vs CP)")
             print(improvements_df.to_string(index=False))
             print()
             
             # Sauvegarder
             improvements_csv = Path('data/results/improvements_analysis.csv')
             improvements_df.to_csv(improvements_csv, index=False)
-            print(f"💾 Analyse sauvegardée: {improvements_csv}")
+            print(f"Analyse sauvegardee: {improvements_csv}")
             print()
-    
-    # Résumé global
-    print("🎯 RÉSUMÉ GLOBAL")
-    print("-" * 80)
+
     
     cp_results = df[df['Méthode'] == 'CP']
     milp_results = df[df['Méthode'] == 'MILP']
@@ -175,10 +155,8 @@ def main():
         
         print(f"CP   - Temps moyen: {avg_cp_time:.2f}s")
         print(f"MILP - Temps moyen: {avg_milp_time:.2f}s")
-        print(f"MILP est {avg_cp_time/avg_milp_time:.1f}× plus rapide en moyenne")
     
     print()
-    print("=" * 80)
 
 if __name__ == '__main__':
     main()

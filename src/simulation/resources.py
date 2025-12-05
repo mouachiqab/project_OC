@@ -1,6 +1,5 @@
 """
 Gestion des ressources médicales (médecins, civières)
-Auteur: Abdelkarim Mouachiq
 """
 import simpy
 from typing import List, Dict, Optional

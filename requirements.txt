@@ -1,16 +1,17 @@
-# Core dependencies
-simpy
-numpy
-pandas
-pyyaml
+# Simulation discrete-event
+simpy>=4.1.0
 
-# Optimization
-pulp
+# Calcul numerique et manipulation de donnees
+numpy>=1.24.0
+pandas>=2.0.0
 
-# Visualization
-matplotlib
-seaborn
+# Optimisation
+pulp>=2.7.0
 
-# Testing
-pytest
+# Visualisation
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Configuration
+pyyaml>=6.0
 

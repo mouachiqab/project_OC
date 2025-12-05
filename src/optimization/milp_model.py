@@ -1,6 +1,5 @@
 """
 Modèle PLNE pour l'optimisation des affectations
-Auteur: Marin Kerbouriou
 """
 from pulp import *
 from typing import List, Dict, Tuple

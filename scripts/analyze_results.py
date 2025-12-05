@@ -1,11 +1,5 @@
-#!/usr/bin/env python3
 """
 Script d'analyse et visualisation des résultats
-Auteurs: Abdelkarim & Marin
-
-Usage:
-    python scripts/analyze_results.py
-    python scripts/analyze_results.py --results-dir data/results
 """
 import argparse
 import sys

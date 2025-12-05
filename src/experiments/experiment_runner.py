@@ -1,6 +1,5 @@
 """
 Lancer les expériences pour les simulations
-Auteurs: Abdelkarim & Marin
 """
 import simpy
 import json

@@ -1,6 +1,5 @@
 """
 Classe Patient pour la simulation des urgences
-Auteur: Abdelkarim Mouachiq
 """
 import numpy as np
 from enum import Enum

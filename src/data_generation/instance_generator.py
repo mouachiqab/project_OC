@@ -1,6 +1,5 @@
 """
 Générateur d'instances pour les expériences
-Auteurs: Abdelkarim & Marin
 """
 import yaml
 import numpy as np
@@ -23,7 +22,6 @@ class InstanceGenerator:
         """Génère une instance pour un scénario et une méthode d'optimisation donnés"""
         scenario = self.config['scenarios'][scenario_name]
         
-        # Copier la config optimization et ajouter la méthode spécifique
         optimization_config = {
             'method': method,
             'interval': self.config['optimization']['interval'],
@@ -40,7 +38,6 @@ class InstanceGenerator:
             'scenario': scenario
         }
         
-        # Appliquer les modifications du scénario
         if 'arrival_multiplier' in scenario:
             instance['patient_flow']['arrival_rate'] *= scenario['arrival_multiplier']
         
@@ -49,7 +46,6 @@ class InstanceGenerator:
                 instance['resources'][resource] = value
         
         if 'priority_shift' in scenario:
-            # Ajuster la distribution des priorités
             for priority, prob in scenario['priority_shift'].items():
                 instance['patient_flow']['priority_distribution'][priority] = prob
         
@@ -81,4 +77,3 @@ class InstanceGenerator:
                 self.save_instance(instance, output_path / filename)
                 count += 1
         
-        print(f"Generated {count} instances for {self.hospital_type} ({len(self.config['scenarios'])} scenarios × {len(methods)} methods)")

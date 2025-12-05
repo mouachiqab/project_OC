@@ -1,6 +1,5 @@
 """
 Interface commune pour les optimiseurs
-Auteurs: Abdelkarim & Marin
 """
 from abc import ABC, abstractmethod
 from typing import List, Dict, Tuple
@@ -38,5 +37,3 @@ def create_optimizer(method: str, **kwargs):
     elif method.upper() == 'MILP':
         from .milp_model import MILPOptimizer
         return MILPOptimizer(**kwargs)
-    else:
-        raise ValueError(f"Unknown optimization method: {method}")

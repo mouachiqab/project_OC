@@ -1,5 +1,4 @@
 # Configuration : Grand Centre Hospitalier Universitaire (CHU)
-# Auteurs: Abdelkarim & Marin
 
 hospital:
   name: "CHU Universitaire"
@@ -21,8 +20,7 @@ patient_flow:
 
 optimization:
   interval: 30
-  time_limit: 20
-  # Méthodes à tester: CP et MILP
+  time_limit: 20  # secondes 
   methods:
     CP:
       solver: "chuffed"
@@ -30,9 +28,9 @@ optimization:
       solver: "PULP_CBC_CMD"
 
 simulation:
-  duration: 360  # minutes (6 heures)
+  duration: 300  #  minutes (5 heures)
   warmup: 30
-  replications: 2
+  replications: 5
 
 scenarios:
   baseline:

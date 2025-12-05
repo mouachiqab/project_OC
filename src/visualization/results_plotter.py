@@ -1,6 +1,5 @@
 """
 Visualisation des résultats d'expériences
-Auteurs: Abdelkarim & Marin
 """
 import json
 import numpy as np
@@ -43,15 +42,15 @@ class ResultsPlotter:
     
     def plot_waiting_times_evolution(self, output_path: str = None):
         """Graphique : évolution des temps d'attente au cours de la simulation"""
-        fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+        fig, axes = plt.subplots(3, 2, figsize=(16, 18))
         fig.suptitle('Évolution des Temps d\'Attente par Type d\'Hôpital', fontsize=16, fontweight='bold')
         
         hospital_types = ['small', 'medium', 'large']
         scenarios = ['baseline', 'peak_flu']
         
         plot_idx = 0
-        for scenario in scenarios:
-            for hospital_type in hospital_types[:2]:  # small et medium
+        for hospital_type in hospital_types:
+            for scenario in scenarios:
                 ax = axes[plot_idx // 2, plot_idx % 2]
                 
                 # Filtrer les résultats
@@ -60,23 +59,37 @@ class ResultsPlotter:
                            and scenario in r['instance_name']]
                 
                 if not matching:
+                    plot_idx += 1
                     continue
                 
                 for result in matching:
+                    method = result['optimization']['method']
+                    
+                    # Moyenner les répétitions
+                    all_wait_times = []
+                    common_times = None
+                    
                     for replication in result['replications']:
                         metrics = replication['metrics']
-                        times = metrics['time']
-                        wait_times = metrics['avg_wait_time']
-                        
-                        method = result['optimization']['method']
-                        label = f"{hospital_type.title()} - {method}"
-                        
-                        ax.plot(times, wait_times, alpha=0.6, label=label)
+                        if common_times is None:
+                            common_times = metrics['time']
+                        all_wait_times.append(metrics['avg_wait_time'])
+                    
+                    # Calculer la moyenne des répétitions
+                    avg_wait_times = np.mean(all_wait_times, axis=0)
+                    
+                    # Couleurs fixes: CP=bleu, MILP=rouge
+                    color = '#3498db' if method == 'CP' else '#e74c3c'
+                    marker = 'o' if method == 'CP' else 's'
+                    
+                    label = f"{method}"
+                    ax.plot(common_times, avg_wait_times, linewidth=2, label=label, 
+                           color=color, marker=marker, markersize=4, markevery=5)
                 
                 ax.set_xlabel('Temps de simulation (minutes)', fontweight='bold')
                 ax.set_ylabel('Temps d\'attente moyen (minutes)', fontweight='bold')
-                ax.set_title(f'{hospital_type.title()} - {scenario.replace("_", " ").title()}')
-                ax.legend()
+                ax.set_title(f'{hospital_type.title()} - {scenario.replace("_", " ").title()}', fontsize=12)
+                ax.legend(loc='best')
                 ax.grid(True, alpha=0.3)
                 
                 plot_idx += 1
@@ -103,35 +116,52 @@ class ResultsPlotter:
         for idx, (metric, title) in enumerate(metrics_to_compare):
             ax = axes[idx]
             
-            # Préparer les données
-            cp_values = []
-            milp_values = []
-            labels = []
+            # Créer un dictionnaire pour aligner correctement CP et MILP
+            data_by_instance = {}
             
             for result in self.results:
                 method = result['optimization']['method']
                 value = result['summary'].get(metric, 0)
                 instance_name = result['instance_name']
                 
-                # Simplifier le label
-                label_parts = instance_name.split('_')
-                simple_label = f"{label_parts[0][:3]}-{label_parts[1][:4]}"
+                # Créer une clé unique pour l'instance (sans la méthode)
+                instance_key = '_'.join(instance_name.split('_')[:-1])
                 
-                if method == 'CP':
-                    cp_values.append(value)
-                    if simple_label not in labels:
-                        labels.append(simple_label)
-                elif method == 'MILP':
-                    milp_values.append(value)
+                if instance_key not in data_by_instance:
+                    data_by_instance[instance_key] = {'CP': 0, 'MILP': 0}
+                
+                data_by_instance[instance_key][method] = value
+            
+            # Trier par taille d'hôpital et scénario
+            hospital_order = {'small': 0, 'medium': 1, 'large': 2}
+            scenario_order = {'baseline': 0, 'peak': 1}
+            
+            sorted_instances = sorted(
+                data_by_instance.keys(),
+                key=lambda x: (
+                    hospital_order.get(x.split('_')[0], 999),
+                    scenario_order.get(x.split('_')[1], 999)
+                )
+            )
+            
+            # Extraire les valeurs alignées
+            cp_values = [data_by_instance[inst]['CP'] for inst in sorted_instances]
+            milp_values = [data_by_instance[inst]['MILP'] for inst in sorted_instances]
+            
+            # Créer labels lisibles
+            labels = []
+            for inst in sorted_instances:
+                parts = inst.split('_')
+                hosp = parts[0][:3].capitalize()
+                scen = parts[1][:4].capitalize()
+                labels.append(f"{hosp}-{scen}")
             
             # Tracer
             x = np.arange(len(labels))
             width = 0.35
             
-            if len(cp_values) == len(labels):
-                ax.bar(x - width/2, cp_values, width, label='CP', color='#3498db')
-            if len(milp_values) == len(labels):
-                ax.bar(x + width/2, milp_values, width, label='MILP', color='#e74c3c')
+            ax.bar(x - width/2, cp_values, width, label='CP', color='#3498db')
+            ax.bar(x + width/2, milp_values, width, label='MILP', color='#e74c3c')
             
             ax.set_xlabel('Instance', fontweight='bold')
             ax.set_ylabel(metric.replace('_', ' ').title(), fontweight='bold')
@@ -154,40 +184,83 @@ class ResultsPlotter:
         fig, axes = plt.subplots(1, 2, figsize=(14, 6))
         fig.suptitle('Utilisation des Ressources', fontsize=16, fontweight='bold')
         
-        # Données pour médecins et civières
-        doctor_util = []
-        bed_util = []
-        instance_labels = []
+        # Dictionnaire pour organiser les données
+        data_dict = {}
         
         for result in self.results:
             if 'baseline' not in result['instance_name']:
                 continue
             
+            # Calculer la moyenne sur toutes les réplications
+            doc_utils = []
+            bed_utils = []
+            
             for replication in result['replications']:
                 resource_stats = replication['resource_stats']
+                doc_utils.append(float(np.mean(resource_stats['doctors']['utilization_rates'])))
                 
-                # Convertir en float si c'est un numpy type
-                doc_util = float(np.mean(resource_stats['doctors']['utilization_rates']))
-                bed_util = float(np.mean(resource_stats['beds']['occupancy_rates']))
-                
-                doctor_util.append(doc_util)
-                bed_util.append(bed_util)
-                
-                label = f"{result['hospital']['type'][:3]}-{result['optimization']['method']}"
-                instance_labels.append(label)
+                # Pour les civières, calculer seulement sur celles utilisées (> 0)
+                bed_rates = resource_stats['beds']['occupancy_rates']
+                used_beds = [rate for rate in bed_rates if rate > 0]
+                bed_util_avg = np.mean(used_beds) if used_beds else 0
+                bed_utils.append(float(bed_util_avg))
+            
+            hospital_type = result['hospital']['type']
+            method = result['optimization']['method']
+            
+            key = f"{hospital_type}_{method}"
+            data_dict[key] = {
+                'doctor_util': np.mean(doc_utils),
+                'bed_util': np.mean(bed_utils),
+                'hospital': hospital_type,
+                'method': method
+            }
+        
+        # Trier les données : small, medium, large, puis CP avant MILP
+        hospital_order = {'small': 0, 'medium': 1, 'large': 2}
+        method_order = {'CP': 0, 'MILP': 1}
+        
+        sorted_keys = sorted(
+            data_dict.keys(),
+            key=lambda x: (
+                hospital_order.get(data_dict[x]['hospital'], 999),
+                method_order.get(data_dict[x]['method'], 999)
+            )
+        )
+        
+        # Extraire les données triées
+        doctor_util = []
+        bed_util = []
+        instance_labels = []
+        colors_doc = []
+        colors_bed = []
+        
+        for key in sorted_keys:
+            data = data_dict[key]
+            doctor_util.append(data['doctor_util'])
+            bed_util.append(data['bed_util'])
+            
+            hosp = data['hospital'][:3].capitalize()
+            method = data['method']
+            instance_labels.append(f"{hosp}-{method}")
+            
+            # Couleurs : CP=bleu, MILP=rouge
+            color = '#3498db' if method == 'CP' else '#e74c3c'
+            colors_doc.append(color)
+            colors_bed.append(color)
         
         # Graphique médecins
         ax1 = axes[0]
-        ax1.barh(instance_labels, doctor_util, color='#2ecc71')
+        ax1.barh(instance_labels, doctor_util, color=colors_doc)
         ax1.set_xlabel('Taux d\'Utilisation (%)', fontweight='bold')
         ax1.set_title('Utilisation des Médecins')
         ax1.grid(True, alpha=0.3, axis='x')
         
         # Graphique civières
         ax2 = axes[1]
-        ax2.barh(instance_labels, bed_util, color='#9b59b6')
+        ax2.barh(instance_labels, bed_util, color=colors_bed)
         ax2.set_xlabel('Taux d\'Occupation (%)', fontweight='bold')
-        ax2.set_title('Occupation des Civières')
+        ax2.set_title('Occupation des Civières (utilisees)')
         ax2.grid(True, alpha=0.3, axis='x')
         
         plt.tight_layout()
@@ -250,8 +323,6 @@ class ResultsPlotter:
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
         
-        print("GENERATING ALL PLOTS")
-        
         plots = [
             ('waiting_times_evolution', self.plot_waiting_times_evolution),
             ('cp_vs_milp_comparison', self.plot_comparison_cp_vs_milp),
@@ -266,7 +337,7 @@ class ResultsPlotter:
             except Exception as e:
                 print(f"Error generating {name}: {e}")
         
-        print(f"ALL PLOTS SAVED IN: {output_dir}")
+
     
     def generate_summary_table(self, output_path: str = None):
         """Génère un tableau récapitulatif des résultats"""
@@ -291,7 +362,7 @@ class ResultsPlotter:
             df.to_csv(output_path, index=False)
             print(f"Summary table saved to: {output_path}")
         
-        print("SUMMARY TABLE")
+
         print(df.to_string(index=False))
         
         return df

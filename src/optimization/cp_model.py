@@ -1,6 +1,5 @@
 """
 Interface Python pour le modèle CP MiniZinc
-Auteur: Abdelkarim Mouachiq
 """
 from minizinc import Instance, Model, Solver
 from typing import List, Dict, Tuple, Optional
@@ -44,8 +43,6 @@ class CPOptimizer:
         Returns:
             Liste de tuples (patient_id, doctor_id, bed_id)
         """
-        if self.model is None or self.solver is None:
-            return []
         
         waiting_patients = state['waiting_patients']
         available_doctors = state['available_doctors']
@@ -55,9 +52,6 @@ class CPOptimizer:
         n_patients = len(waiting_patients)
         n_doctors = len(available_doctors)
         n_beds = len(available_beds)
-        
-        if n_patients == 0 or n_doctors == 0 or n_beds == 0:
-            return []
         
         # Préparer les données pour MiniZinc
         priority_values = [p.priority.value for p in waiting_patients]

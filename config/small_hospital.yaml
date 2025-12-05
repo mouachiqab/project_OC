@@ -1,5 +1,4 @@
 # Configuration : Petit Hôpital
-# Auteurs: Abdelkarim & Marin
 
 hospital:
   name: "Petit Hôpital Régional"
@@ -23,7 +22,6 @@ patient_flow:
 optimization:
   interval: 30  # minutes entre optimisations
   time_limit: 20  # secondes
-  # Méthodes à tester: CP et MILP
   methods:
     CP:
       solver: "chuffed"
@@ -31,9 +29,9 @@ optimization:
       solver: "PULP_CBC_CMD"
 
 simulation:
-  duration: 360  # minutes (6 heures)
+  duration: 300  # minutes (5 heures)
   warmup: 30     # minutes de warm-up
-  replications: 3  # nombre de répétitions
+  replications: 5  # nombre de répétitions
 
 scenarios:
   baseline:

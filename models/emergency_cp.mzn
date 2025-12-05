@@ -1,5 +1,4 @@
 % Modèle MiniZinc pour l'optimisation des urgences
-% Auteur: Abdelkarim Mouachiq
 
 include "globals.mzn";
 

@@ -1,6 +1,5 @@
 """
 Simulation du service des urgences avec SimPy
-Auteur: Marin Kerbouriou
 """
 import simpy
 import numpy as np
@@ -239,9 +238,6 @@ class EmergencyDepartment:
         # Exécuter la simulation
         self.env.run(until=simulation_time)
         
-        print(f"\n{'='*60}")
-        print(f"SIMULATION COMPLETED")
-        print(f"{'='*60}")
         print(f"Total arrivals: {self.total_arrivals}")
         print(f"Total treated: {self.total_treated}")
         print(f"Total deteriorations: {self.total_deteriorations}")
@@ -251,7 +247,6 @@ class EmergencyDepartment:
     
     def get_results(self) -> Dict:
         """Retourne les résultats de la simulation"""
-        # Convertir les patients en format sérialisable
         discharged_data = [
             {
                 'id': p.id,
